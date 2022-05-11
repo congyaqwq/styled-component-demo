@@ -2,7 +2,7 @@ import React, { CSSProperties, useEffect } from 'react';
 
 const specialMap = {
 	p: 'padding',
-	pl: 'paddingLeft',
+	pl: 'padding-left',
 	px: ['padding-right', 'padding-left'],
 } as unknown as {
 	[key: string]: keyof CSSProperties | (keyof CSSProperties)[];
@@ -26,14 +26,19 @@ const addPxforNumber = (key:keyof CSSProperties, value: any)=> {
 	}
 }
 
+function isArray<T>(value:T|T[]):value is T[]{
+	return Array.isArray(value);
+}
+
 const convertSxToCssString = (sx?:CSSProperties)=> {
 	if(!sx) return '';
-	return Object.keys(sx).map((key) => {
+	return (Object.keys(sx) as (keyof CSSProperties)[]).map((key) => {
 		if(isSpecial(key)) {
-			if(Array.isArray(specialMap[key])){
-				return (specialMap[key] as (keyof CSSProperties)[]).map(sk=>addPxforNumber(sk, sx[key as keyof CSSProperties])).join('');
+			const newKey = specialMap[key]
+			if(isArray<keyof CSSProperties>(newKey)){
+				return newKey.map(sk=>addPxforNumber(sk, sx[key])).join('');
 			}else {
-				return addPxforNumber(specialMap[key] as keyof CSSProperties, sx[key as keyof CSSProperties]);
+				return addPxforNumber(newKey, sx[key]);
 			}
 		} 
 		return addPxforNumber(key as keyof CSSProperties, sx[key])
@@ -47,7 +52,6 @@ export default function useStyledCom(com: JSX.Element, sx?: CSSProperties) {
 		const styleSheet = document.createElement('style');
 		document.head.appendChild(styleSheet);
 		const sheet = styleSheet.sheet;
-		console.log(convertSxToCssString(sx),999)
 		sheet?.insertRule(`.${className} { ${convertSxToCssString(sx)} }`, 0);
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	},[])

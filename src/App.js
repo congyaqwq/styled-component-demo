@@ -5,6 +5,7 @@ function App() {
   return (
     <div className="App">
       <Button sx={{color:'red', height: 100, px: 100}} />
+      <Button sx={{color:'red', height: 100, px: 100}} />
     </div>
   );
 }

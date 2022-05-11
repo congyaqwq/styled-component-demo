@@ -1,4 +1,4 @@
-import React, { CSSProperties, useEffect } from 'react';
+import React, { CSSProperties, useEffect, useState } from 'react';
 
 const specialMap = {
 	p: 'padding',
@@ -45,14 +45,26 @@ const convertSxToCssString = (sx?:CSSProperties)=> {
 	}).join('');
 }
 
+let cache = {} as {[key: string]: string};
+
 export default function useStyledCom(com: JSX.Element, sx?: CSSProperties) {
-	const className = `css-${~~(Math.random() * 100000)}`;
+	const [className, setClassName] = useState('')
 
 	useEffect(()=>{
-		const styleSheet = document.createElement('style');
+		const styleSheets = document.getElementsByTagName('style');
+		const cacheStyleSheet = Array.prototype.slice.call(styleSheets).find(sh => sh?.dataset?.emotion==='css-global')
+		const styleSheet = cacheStyleSheet || document.createElement('style');
+		if(!cacheStyleSheet) {
+			styleSheet.dataset.emotion = 'css-global';
+		}
 		document.head.appendChild(styleSheet);
+
 		const sheet = styleSheet.sheet;
-		sheet?.insertRule(`.${className} { ${convertSxToCssString(sx)} }`, 0);
+		const stringSx = convertSxToCssString(sx);
+		const newClass = cache[stringSx]?cache[stringSx]:`css-${~~(Math.random() * 100000)}`
+		setClassName(newClass)
+		sheet?.insertRule(`.${newClass} { ${convertSxToCssString(sx)} }`, 0);
+		cache[stringSx] = newClass;
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	},[])
 

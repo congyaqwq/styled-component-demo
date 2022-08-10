@@ -7,4 +7,4 @@
 How to make `Your Component` to be `Styled Component`
 
 ## main code
-/hook/useStyledComponent
+`/hook/useStyledComponent`
